@@ -89,8 +89,6 @@ export default function JsonFormatter() {
       if (!response.ok) {
         throw new Error(data.error || "アップロードに失敗しました");
       }
-
-      toast.success(`S3にアップロードしました: ${data.fileName}`);
     } catch (e) {
       console.error("S3アップロードエラー:", e);
       toast.error(
