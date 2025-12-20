@@ -31,7 +31,7 @@ npm install
 AWS_REGION=ap-northeast-1
 AWS_ACCESS_KEY_ID=your_access_key_id
 AWS_SECRET_ACCESS_KEY=your_secret_access_key
-AWS_S3_BUCKET_NAME=your_bucket_name
+S3_BUCKET_NAME=your_bucket_name
 ```
 
 `.env.local.example`ファイルをテンプレートとして使用できます。
