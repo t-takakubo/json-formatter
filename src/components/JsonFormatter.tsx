@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  AlertCircle,
-  Check,
-  Copy,
-  Sparkles,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { AlertCircle, Check, Copy, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -32,7 +25,7 @@ export default function JsonFormatter() {
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFormat = () => {
+  const handleFormat = async () => {
     if (!inputJson.trim()) {
       setError("JSONを入力してください");
       setOutputJson("");
@@ -46,6 +39,9 @@ export default function JsonFormatter() {
       setOutputJson(formatted);
       setError(null);
       toast.success("JSONを整形しました");
+
+      // 自動的にS3にアップロード
+      await uploadToS3(formatted);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "無効なJSONです";
       setError(errorMessage);
@@ -73,9 +69,8 @@ export default function JsonFormatter() {
     }
   };
 
-  const handleUploadToS3 = async () => {
-    if (!outputJson) {
-      toast.error("アップロードするJSONがありません");
+  const uploadToS3 = async (jsonContent: string) => {
+    if (!jsonContent) {
       return;
     }
 
@@ -86,7 +81,7 @@ export default function JsonFormatter() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ jsonContent: outputJson }),
+        body: JSON.stringify({ jsonContent }),
       });
 
       const data = await response.json();
@@ -148,13 +143,29 @@ export default function JsonFormatter() {
           {/* 出力エリア */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-600" />
-                <span>出力</span>
-              </CardTitle>
-              <CardDescription>
-                フォーマット済みのJSONが表示されます
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-600" />
+                    <span>出力</span>
+                  </CardTitle>
+                  <CardDescription>
+                    フォーマット済みのJSONが表示されます
+                  </CardDescription>
+                </div>
+                {outputJson && (
+                  <Button
+                    type="button"
+                    onClick={handleCopy}
+                    variant="secondary"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="min-h-100 rounded-md overflow-auto border bg-muted/30">
@@ -204,9 +215,10 @@ export default function JsonFormatter() {
             onClick={handleFormat}
             size="lg"
             className="gap-2"
+            disabled={isUploading}
           >
             <Sparkles className="w-4 h-4" />
-            Format
+            {isUploading ? "Formatting & Uploading..." : "Format"}
           </Button>
           <Button
             type="button"
@@ -217,28 +229,6 @@ export default function JsonFormatter() {
           >
             <Trash2 className="w-4 h-4" />
             Clear
-          </Button>
-          <Button
-            type="button"
-            onClick={handleCopy}
-            disabled={!outputJson}
-            variant="secondary"
-            size="lg"
-            className="gap-2"
-          >
-            <Copy className="w-4 h-4" />
-            Copy
-          </Button>
-          <Button
-            type="button"
-            onClick={handleUploadToS3}
-            disabled={!outputJson || isUploading}
-            variant="default"
-            size="lg"
-            className="gap-2"
-          >
-            <Upload className="w-4 h-4" />
-            {isUploading ? "Uploading..." : "Upload to S3"}
           </Button>
         </div>
 
