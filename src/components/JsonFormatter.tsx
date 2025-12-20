@@ -23,8 +23,9 @@ export default function JsonFormatter() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson, setOutputJson] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFormat = () => {
+  const handleFormat = async () => {
     if (!inputJson.trim()) {
       setError("JSONを入力してください");
       setOutputJson("");
@@ -38,6 +39,9 @@ export default function JsonFormatter() {
       setOutputJson(formatted);
       setError(null);
       toast.success("JSONを整形しました");
+
+      // 自動的にS3にアップロード
+      await uploadToS3(formatted);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "無効なJSONです";
       setError(errorMessage);
@@ -62,6 +66,36 @@ export default function JsonFormatter() {
     } catch (e) {
       console.error("コピーに失敗しました:", e);
       toast.error("コピーに失敗しました");
+    }
+  };
+
+  const uploadToS3 = async (jsonContent: string) => {
+    if (!jsonContent) {
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jsonContent }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "アップロードに失敗しました");
+      }
+    } catch (e) {
+      console.error("S3アップロードエラー:", e);
+      toast.error(
+        e instanceof Error ? e.message : "S3へのアップロードに失敗しました",
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -107,13 +141,29 @@ export default function JsonFormatter() {
           {/* 出力エリア */}
           <Card className="shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Check className="w-5 h-5 text-green-600" />
-                <span>出力</span>
-              </CardTitle>
-              <CardDescription>
-                フォーマット済みのJSONが表示されます
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-600" />
+                    <span>出力</span>
+                  </CardTitle>
+                  <CardDescription>
+                    フォーマット済みのJSONが表示されます
+                  </CardDescription>
+                </div>
+                {outputJson && (
+                  <Button
+                    type="button"
+                    onClick={handleCopy}
+                    variant="secondary"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    Copy
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               <div className="min-h-100 rounded-md overflow-auto border bg-muted/30">
@@ -163,9 +213,10 @@ export default function JsonFormatter() {
             onClick={handleFormat}
             size="lg"
             className="gap-2"
+            disabled={isUploading}
           >
             <Sparkles className="w-4 h-4" />
-            Format
+            {isUploading ? "Formatting & Uploading..." : "Format"}
           </Button>
           <Button
             type="button"
@@ -176,17 +227,6 @@ export default function JsonFormatter() {
           >
             <Trash2 className="w-4 h-4" />
             Clear
-          </Button>
-          <Button
-            type="button"
-            onClick={handleCopy}
-            disabled={!outputJson}
-            variant="secondary"
-            size="lg"
-            className="gap-2"
-          >
-            <Copy className="w-4 h-4" />
-            Copy
           </Button>
         </div>
 
