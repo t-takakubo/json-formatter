@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || "ap-northeast-1",
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     if (!jsonContent) {
       return NextResponse.json(
         { error: "JSONコンテンツが必要です" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     if (!bucketName) {
       return NextResponse.json(
         { error: "S3バケット名が設定されていません" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         error: "S3へのアップロードに失敗しました",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

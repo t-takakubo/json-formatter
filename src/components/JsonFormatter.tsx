@@ -1,6 +1,13 @@
 "use client";
 
-import { AlertCircle, Check, Copy, Sparkles, Trash2, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  Check,
+  Copy,
+  Sparkles,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -91,7 +98,9 @@ export default function JsonFormatter() {
       toast.success(`S3にアップロードしました: ${data.fileName}`);
     } catch (e) {
       console.error("S3アップロードエラー:", e);
-      toast.error(e instanceof Error ? e.message : "S3へのアップロードに失敗しました");
+      toast.error(
+        e instanceof Error ? e.message : "S3へのアップロードに失敗しました",
+      );
     } finally {
       setIsUploading(false);
     }
