@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Check, Copy, Sparkles, Trash2 } from "lucide-react";
+import { AlertCircle, Check, Copy, Sparkles, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -23,6 +23,7 @@ export default function JsonFormatter() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson, setOutputJson] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFormat = () => {
     if (!inputJson.trim()) {
@@ -62,6 +63,37 @@ export default function JsonFormatter() {
     } catch (e) {
       console.error("コピーに失敗しました:", e);
       toast.error("コピーに失敗しました");
+    }
+  };
+
+  const handleUploadToS3 = async () => {
+    if (!outputJson) {
+      toast.error("アップロードするJSONがありません");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jsonContent: outputJson }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "アップロードに失敗しました");
+      }
+
+      toast.success(`S3にアップロードしました: ${data.fileName}`);
+    } catch (e) {
+      console.error("S3アップロードエラー:", e);
+      toast.error(e instanceof Error ? e.message : "S3へのアップロードに失敗しました");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -187,6 +219,17 @@ export default function JsonFormatter() {
           >
             <Copy className="w-4 h-4" />
             Copy
+          </Button>
+          <Button
+            type="button"
+            onClick={handleUploadToS3}
+            disabled={!outputJson || isUploading}
+            variant="default"
+            size="lg"
+            className="gap-2"
+          >
+            <Upload className="w-4 h-4" />
+            {isUploading ? "Uploading..." : "Upload to S3"}
           </Button>
         </div>
 
