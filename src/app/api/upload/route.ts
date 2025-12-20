@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const bucketName = process.env.S3_BUCKET_NAME;
     if (!bucketName) {
       return NextResponse.json(
         { error: "S3バケット名が設定されていません" },
