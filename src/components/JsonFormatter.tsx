@@ -7,7 +7,6 @@ import {
   prism,
   tomorrow,
 } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +28,6 @@ export default function JsonFormatter() {
     if (!inputJson.trim()) {
       setError("JSONを入力してください");
       setOutputJson("");
-      toast.error("JSONを入力してください");
       return;
     }
 
@@ -38,7 +36,6 @@ export default function JsonFormatter() {
       const formatted = JSON.stringify(parsed, null, 2);
       setOutputJson(formatted);
       setError(null);
-      toast.success("JSONを整形しました");
 
       // 自動的にS3にアップロード
       await uploadToS3(formatted);
@@ -46,7 +43,6 @@ export default function JsonFormatter() {
       const errorMessage = e instanceof Error ? e.message : "無効なJSONです";
       setError(errorMessage);
       setOutputJson("");
-      toast.error(errorMessage);
     }
   };
 
@@ -54,7 +50,6 @@ export default function JsonFormatter() {
     setInputJson("");
     setOutputJson("");
     setError(null);
-    toast.info("クリアしました");
   };
 
   const handleCopy = async () => {
@@ -62,10 +57,8 @@ export default function JsonFormatter() {
 
     try {
       await navigator.clipboard.writeText(outputJson);
-      toast.success("クリップボードにコピーしました");
     } catch (e) {
       console.error("コピーに失敗しました:", e);
-      toast.error("コピーに失敗しました");
     }
   };
 
@@ -91,9 +84,7 @@ export default function JsonFormatter() {
       }
     } catch (e) {
       console.error("S3アップロードエラー:", e);
-      toast.error(
-        e instanceof Error ? e.message : "S3へのアップロードに失敗しました",
-      );
+      // エラーはコンソールにのみ出力し、ユーザーには通知しない
     } finally {
       setIsUploading(false);
     }
@@ -216,7 +207,7 @@ export default function JsonFormatter() {
             disabled={isUploading}
           >
             <Sparkles className="w-4 h-4" />
-            {isUploading ? "Formatting & Uploading..." : "Format"}
+            {isUploading ? "Formatting..." : "Format"}
           </Button>
           <Button
             type="button"
