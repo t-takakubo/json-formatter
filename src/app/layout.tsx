@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     "整形",
     "JSON整形",
     "JSONツール",
+    "JSONフォーマット",
     "シンタックスハイライト",
     "オンラインツール",
   ],
