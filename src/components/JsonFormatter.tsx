@@ -7,6 +7,7 @@ import {
   prism,
   tomorrow,
 } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,8 +95,11 @@ export default function JsonFormatter() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* ヘッダー */}
-        <header className="mb-8 text-center">
-          <div className="flex items-center justify-center gap-3 mb-3">
+        <header className="mb-8">
+          <div className="flex justify-end mb-4">
+            <ThemeToggle />
+          </div>
+          <div className="flex items-center justify-center gap-3 mb-3 text-center">
             <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               JSON Formatter
