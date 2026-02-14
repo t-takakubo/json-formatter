@@ -1,6 +1,5 @@
 "use client";
 
-import * as yaml from "js-yaml";
 import {
   AlertCircle,
   Check,
@@ -86,7 +85,7 @@ export default function JsonFormatter() {
     }
   };
 
-  const handleToYaml = () => {
+  const handleToYaml = async () => {
     if (!inputJson.trim()) {
       setError("JSONを入力してください");
       setOutputJson("");
@@ -94,6 +93,7 @@ export default function JsonFormatter() {
     }
 
     try {
+      const yaml = await import("js-yaml");
       const parsed = JSON.parse(inputJson);
       const yamlStr = yaml.dump(parsed, { indent: 2 });
       setOutputJson(yamlStr);
