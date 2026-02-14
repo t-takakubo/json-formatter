@@ -34,14 +34,33 @@ import { Textarea } from "@/components/ui/textarea";
 type IndentType = 2 | 4 | "\t";
 type OutputLang = "json" | "yaml";
 
+const STORAGE_KEY_INDENT = "json-formatter:indent";
+const STORAGE_KEY_LANG = "json-formatter:outputLang";
+
+const getStoredIndent = (): IndentType => {
+  if (typeof window === "undefined") return 2;
+  const saved = localStorage.getItem(STORAGE_KEY_INDENT);
+  if (saved === "2" || saved === "4") return Number(saved) as IndentType;
+  if (saved === "\t") return "\t";
+  return 2;
+};
+
+const getStoredLang = (): OutputLang => {
+  if (typeof window === "undefined") return "json";
+  const saved = localStorage.getItem(STORAGE_KEY_LANG);
+  if (saved === "json" || saved === "yaml") return saved;
+  return "json";
+};
+
 export default function JsonFormatter() {
   const [inputJson, setInputJson] = useState("");
   const [outputJson, setOutputJson] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [indent, setIndent] = useState<IndentType>(2);
+  const [indent, setIndent] = useState<IndentType>(getStoredIndent);
   const [isDragging, setIsDragging] = useState(false);
-  const [outputLang, setOutputLang] = useState<OutputLang>("json");
+  const [outputLang, setOutputLang] = useState<OutputLang>(getStoredLang);
+  const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme } = useTheme();
 
   const uploadToS3 = useCallback(async (jsonContent: string) => {
@@ -180,6 +199,18 @@ export default function JsonFormatter() {
     reader.readAsText(file);
   };
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_INDENT, String(indent));
+  }, [indent]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_LANG, outputLang);
+  }, [outputLang]);
+
   // キーボードショートカット: Cmd/Ctrl+Enter でフォーマット
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -221,7 +252,7 @@ export default function JsonFormatter() {
             className="absolute right-0 top-0 p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
             aria-label="テーマを切り替え"
           >
-            {resolvedTheme === "dark" ? (
+            {mounted && resolvedTheme === "dark" ? (
               <Sun className="w-5 h-5" />
             ) : (
               <Moon className="w-5 h-5" />
