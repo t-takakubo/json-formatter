@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Check, Copy, Sparkles, Trash2 } from "lucide-react";
+import { AlertCircle, Check, Copy, Minimize2, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -39,6 +39,28 @@ export default function JsonFormatter() {
 
       // 自動的にS3にアップロード
       await uploadToS3(formatted);
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "無効なJSONです";
+      setError(errorMessage);
+      setOutputJson("");
+    }
+  };
+
+  const handleMinify = async () => {
+    if (!inputJson.trim()) {
+      setError("JSONを入力してください");
+      setOutputJson("");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(inputJson);
+      const minified = JSON.stringify(parsed);
+      setOutputJson(minified);
+      setError(null);
+
+      // 自動的にS3にアップロード
+      await uploadToS3(minified);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "無効なJSONです";
       setError(errorMessage);
@@ -207,7 +229,18 @@ export default function JsonFormatter() {
             disabled={isUploading}
           >
             <Sparkles className="w-4 h-4" />
-            {isUploading ? "Formatting..." : "Format"}
+            Format
+          </Button>
+          <Button
+            type="button"
+            onClick={handleMinify}
+            variant="outline"
+            size="lg"
+            className="gap-2"
+            disabled={isUploading}
+          >
+            <Minimize2 className="w-4 h-4" />
+            Minify
           </Button>
           <Button
             type="button"
