@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JSON Formatter - JSONを整形して見やすく表示",
+  title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
   description:
-    "JSONを入力するだけで、整形して見やすく表示できるシンプルなWebツールです。シンタックスハイライト、ダークモード対応。",
+    "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
   keywords: [
     "JSON",
     "フォーマッター",
@@ -25,6 +25,18 @@ export const metadata: Metadata = {
     "JSONフォーマット",
     "シンタックスハイライト",
     "オンラインツール",
+    "JSON formatter",
+    "JSON beautifier",
+    "JSON validator",
+    "JSON parser",
+    "JSONバリデーター",
+    "JSON整形ツール",
+    "JSON可視化",
+    "JSONビューワー",
+    "JSON無料",
+    "JSON登録不要",
+    "JSON pretty print",
+    "オンラインツール無料",
   ],
   authors: [{ name: "JSON Formatter" }],
   creator: "JSON Formatter",
@@ -41,9 +53,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "JSON Formatter - JSONを整形して見やすく表示",
+    title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
     description:
-      "JSONを入力するだけで、整形して見やすく表示できるシンプルなWebツールです。シンタックスハイライト、ダークモード対応。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
     url: "/",
     siteName: "JSON Formatter",
     locale: "ja_JP",
@@ -51,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "JSON Formatter - JSONを整形して見やすく表示",
+    title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
     description:
-      "JSONを入力するだけで、整形して見やすく表示できるシンプルなWebツールです。シンタックスハイライト、ダークモード対応。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
   },
   robots: {
     index: true,
@@ -79,12 +91,12 @@ export default function RootLayout({
 }>) {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-  const jsonLd = {
+  const webAppSchema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "JSON Formatter",
     description:
-      "JSONを入力するだけで、整形して見やすく表示できるシンプルなWebツールです。シンタックスハイライト、ダークモード対応。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
     url: baseUrl,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
@@ -97,6 +109,74 @@ export default function RootLayout({
       "JSONの整形と見やすい表示",
       "シンタックスハイライト",
       "ダークモード対応",
+      "JSONバリデーション",
+      "ワンクリックコピー",
+    ],
+  };
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "JSONを整形する方法",
+    description: "JSON Formatterを使ってJSONを整形する手順",
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "JSONを貼り付ける",
+        text: "左側のテキストエリアに整形したいJSONを貼り付けてください。",
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: "Formatボタンをクリック",
+        text: "「Format」ボタンをクリックするとJSONが自動的に整形・バリデーションされます。",
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "結果をコピーする",
+        text: "右側に整形済みのJSONが表示されます。Copyボタンでクリップボードにコピーできます。",
+      },
+    ],
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "JSON Formatterは無料で使えますか？",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "はい、完全無料・登録不要でご利用いただけます。",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "JSONのバリデーション（構文チェック）はできますか？",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "はい、入力されたJSONの構文エラーを自動で検出し、エラー内容を表示します。",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "どんなJSONに対応していますか？",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "標準的なJSON形式すべてに対応しています。ネストしたオブジェクト・配列も正しく整形できます。",
+        },
+      },
+      {
+        "@type": "Question",
+        name: "ダークモードに対応していますか？",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "はい、ライトモード・ダークモードの両方に対応しており、シンタックスハイライトも各モードに最適化されています。",
+        },
+      },
     ],
   };
 
@@ -106,7 +186,17 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data for SEO
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data for SEO
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD structured data for SEO
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
       <body
