@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
   description:
-    "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
+    "JSONを貼り付けるだけで即座に整形・バリデーション。YAML変換・JSON圧縮（Minify）にも対応。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
   keywords: [
     "JSON",
     "フォーマッター",
@@ -39,6 +39,12 @@ export const metadata: Metadata = {
     "JSON登録不要",
     "JSON pretty print",
     "オンラインツール無料",
+    "YAML変換",
+    "JSONからYAML",
+    "JSON to YAML",
+    "JSON圧縮",
+    "JSON minify",
+    "JSONミニファイ",
   ],
   authors: [{ name: "JSON Formatter" }],
   creator: "JSON Formatter",
@@ -57,7 +63,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
     description:
-      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。YAML変換・JSON圧縮（Minify）にも対応。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
     url: "/",
     siteName: "JSON Formatter",
     locale: "ja_JP",
@@ -67,7 +73,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JSON Formatter - 無料オンラインJSONフォーマッター・バリデーター",
     description:
-      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。YAML変換・JSON圧縮（Minify）にも対応。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
   },
   robots: {
     index: true,
@@ -98,7 +104,7 @@ export default function RootLayout({
     "@type": "WebApplication",
     name: "JSON Formatter",
     description:
-      "JSONを貼り付けるだけで即座に整形・バリデーション。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
+      "JSONを貼り付けるだけで即座に整形・バリデーション。YAML変換・JSON圧縮（Minify）にも対応。シンタックスハイライト、コピー機能、ダークモード対応。登録不要・完全無料のオンラインJSONツールです。",
     url: baseUrl,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
@@ -113,6 +119,9 @@ export default function RootLayout({
       "ダークモード対応",
       "JSONバリデーション",
       "ワンクリックコピー",
+      "YAML変換（JSON to YAML）",
+      "JSON圧縮（Minify）",
+      "ドラッグ＆ドロップでJSONファイル読み込み",
     ],
   };
 
@@ -173,10 +182,10 @@ export default function RootLayout({
       },
       {
         "@type": "Question",
-        name: "ダークモードに対応していますか？",
+        name: "YAML変換はできますか？",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "はい、ライトモード・ダークモードの両方に対応しており、シンタックスハイライトも各モードに最適化されています。",
+          text: "はい、JSONをYAML形式に変換する機能を搭載しています。「→ YAML」ボタンをクリックするだけで変換できます。",
         },
       },
     ],
