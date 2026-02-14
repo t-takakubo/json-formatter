@@ -6,16 +6,20 @@ import {
   Copy,
   FileCode2,
   Minimize2,
+  Moon,
   Sparkles,
+  Sun,
   Trash2,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   prism,
   tomorrow,
 } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +42,37 @@ export default function JsonFormatter() {
   const [indent, setIndent] = useState<IndentType>(2);
   const [isDragging, setIsDragging] = useState(false);
   const [outputLang, setOutputLang] = useState<OutputLang>("json");
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const handleFormat = async () => {
+  const uploadToS3 = useCallback(async (jsonContent: string) => {
+    if (!jsonContent) {
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jsonContent }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "アップロードに失敗しました");
+      }
+    } catch (e) {
+      console.error("S3アップロードエラー:", e);
+      // エラーはコンソールにのみ出力し、ユーザーには通知しない
+    } finally {
+      setIsUploading(false);
+    }
+  }, []);
+
+  const handleFormat = useCallback(async () => {
     if (!inputJson.trim()) {
       setError("JSONを入力してください");
       setOutputJson("");
@@ -60,7 +93,7 @@ export default function JsonFormatter() {
       setError(errorMessage);
       setOutputJson("");
     }
-  };
+  }, [inputJson, indent, uploadToS3]);
 
   const handleMinify = async () => {
     if (!inputJson.trim()) {
@@ -117,8 +150,10 @@ export default function JsonFormatter() {
 
     try {
       await navigator.clipboard.writeText(outputJson);
+      toast.success("コピーしました");
     } catch (e) {
       console.error("コピーに失敗しました:", e);
+      toast.error("コピーに失敗しました");
     }
   };
 
@@ -145,33 +180,17 @@ export default function JsonFormatter() {
     reader.readAsText(file);
   };
 
-  const uploadToS3 = async (jsonContent: string) => {
-    if (!jsonContent) {
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ jsonContent }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "アップロードに失敗しました");
+  // キーボードショートカット: Cmd/Ctrl+Enter でフォーマット
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleFormat();
       }
-    } catch (e) {
-      console.error("S3アップロードエラー:", e);
-      // エラーはコンソールにのみ出力し、ユーザーには通知しない
-    } finally {
-      setIsUploading(false);
-    }
-  };
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [handleFormat]);
 
   const indentOptions: { label: string; value: IndentType }[] = [
     { label: "2", value: 2 },
@@ -183,7 +202,7 @@ export default function JsonFormatter() {
     <div className="min-h-screen bg-linear-to-br from-zinc-50 via-zinc-100 to-zinc-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* ヘッダー */}
-        <header className="mb-8 text-center">
+        <header className="mb-8 text-center relative">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Sparkles className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             <h1 className="text-4xl font-bold bg-linear-to-br from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -193,6 +212,21 @@ export default function JsonFormatter() {
           <p className="text-zinc-600 dark:text-zinc-400 text-lg">
             JSONを整形して見やすく表示します
           </p>
+          {/* ダークモード切替ボタン */}
+          <button
+            type="button"
+            onClick={() =>
+              setTheme(resolvedTheme === "dark" ? "light" : "dark")
+            }
+            className="absolute right-0 top-0 p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="テーマを切り替え"
+          >
+            {resolvedTheme === "dark" ? (
+              <Sun className="w-5 h-5" />
+            ) : (
+              <Moon className="w-5 h-5" />
+            )}
+          </button>
         </header>
 
         {/* インデントサイズ選択 */}
@@ -266,6 +300,13 @@ export default function JsonFormatter() {
                   className="min-h-100 font-mono text-sm resize-y"
                 />
               )}
+              {/* エラーメッセージ（入力エリア直下） */}
+              {error && (
+                <Alert variant="destructive" className="mt-3">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
 
@@ -277,6 +318,11 @@ export default function JsonFormatter() {
                   <CardTitle className="flex items-center gap-2">
                     <Check className="w-5 h-5 text-green-600" />
                     <span>出力</span>
+                    {outputJson && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 uppercase">
+                        {outputLang}
+                      </span>
+                    )}
                   </CardTitle>
                   <CardDescription>
                     フォーマット済みのJSONが表示されます
@@ -299,34 +345,18 @@ export default function JsonFormatter() {
             <CardContent>
               <div className="min-h-100 rounded-md overflow-auto border bg-muted/30">
                 {outputJson ? (
-                  <>
-                    <SyntaxHighlighter
-                      language={outputLang}
-                      style={tomorrow}
-                      customStyle={{
-                        margin: 0,
-                        padding: "1rem",
-                        background: "transparent",
-                        fontSize: "0.875rem",
-                      }}
-                      className="dark:block hidden"
-                    >
-                      {outputJson}
-                    </SyntaxHighlighter>
-                    <SyntaxHighlighter
-                      language={outputLang}
-                      style={prism}
-                      customStyle={{
-                        margin: 0,
-                        padding: "1rem",
-                        background: "transparent",
-                        fontSize: "0.875rem",
-                      }}
-                      className="dark:hidden block"
-                    >
-                      {outputJson}
-                    </SyntaxHighlighter>
-                  </>
+                  <SyntaxHighlighter
+                    language={outputLang}
+                    style={resolvedTheme === "dark" ? tomorrow : prism}
+                    customStyle={{
+                      margin: 0,
+                      padding: "1rem",
+                      background: "transparent",
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {outputJson}
+                  </SyntaxHighlighter>
                 ) : (
                   <div className="h-full min-h-100 flex items-center justify-center text-muted-foreground">
                     フォーマット済みJSONがここに表示されます
@@ -348,6 +378,7 @@ export default function JsonFormatter() {
           >
             <Sparkles className="w-4 h-4" />
             Format
+            <span className="text-xs opacity-60 hidden sm:inline">⌘↵</span>
           </Button>
           <Button
             type="button"
@@ -372,14 +403,6 @@ export default function JsonFormatter() {
             → YAML
           </Button>
         </div>
-
-        {/* エラーメッセージ */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
 
         {/* 機能紹介セクション */}
         <section className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
